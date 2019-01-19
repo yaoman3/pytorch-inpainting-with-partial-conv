@@ -1,6 +1,7 @@
 import argparse
 import numpy as np
 import random
+from multiprocessing import Pool
 from PIL import Image
 
 action_list = [[0, 1], [0, -1], [1, 0], [-1, 0]]
@@ -22,6 +23,21 @@ def random_walk(canvas, ini_x, ini_y, length):
     return canvas
 
 
+def generate(i):
+    filepath = '{:s}/{:06d}.jpg'.format(args.save_dir, i)
+    if not os.path.isfile(filepath):
+        canvas = np.ones((args.image_size, args.image_size)).astype("i")
+        ini_x = random.randint(0, args.image_size - 1)
+        ini_y = random.randint(0, args.image_size - 1)
+        mask = random_walk(canvas, ini_x, ini_y, args.image_size ** 2)
+        print("save:", i, np.sum(mask))
+
+        img = Image.fromarray(mask * 255).convert('1')
+        img.save(filepath)
+    else:
+        print("exist:", i)
+
+
 if __name__ == '__main__':
     import os
 
@@ -34,12 +50,14 @@ if __name__ == '__main__':
     if not os.path.exists(args.save_dir):
         os.makedirs(args.save_dir)
 
-    for i in range(args.N):
-        canvas = np.ones((args.image_size, args.image_size)).astype("i")
-        ini_x = random.randint(0, args.image_size - 1)
-        ini_y = random.randint(0, args.image_size - 1)
-        mask = random_walk(canvas, ini_x, ini_y, args.image_size ** 2)
-        print("save:", i, np.sum(mask))
+    p = Pool(15)
+    p.map(generate, range(args.N))
+    # for i in range(args.N):
+    #     canvas = np.ones((args.image_size, args.image_size)).astype("i")
+    #     ini_x = random.randint(0, args.image_size - 1)
+    #     ini_y = random.randint(0, args.image_size - 1)
+    #     mask = random_walk(canvas, ini_x, ini_y, args.image_size ** 2)
+    #     print("save:", i, np.sum(mask))
 
-        img = Image.fromarray(mask * 255).convert('1')
-        img.save('{:s}/{:06d}.jpg'.format(args.save_dir, i))
+    #     img = Image.fromarray(mask * 255).convert('1')
+    #     img.save('{:s}/{:06d}.jpg'.format(args.save_dir, i))

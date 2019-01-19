@@ -3,6 +3,7 @@ import math
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
+from partialconv2d import PartialConv2d
 from torchvision import models
 
 
@@ -98,13 +99,17 @@ class PCBActiv(nn.Module):
                  conv_bias=False):
         super().__init__()
         if sample == 'down-5':
-            self.conv = PartialConv(in_ch, out_ch, 5, 2, 2, bias=conv_bias)
+            # self.conv = PartialConv(in_ch, out_ch, 5, 2, 2, bias=conv_bias)
+            self.conv = PartialConv2d(in_ch, out_ch, 5, 2, 2, bias=conv_bias, return_mask=True, multi_channel=True)
         elif sample == 'down-7':
-            self.conv = PartialConv(in_ch, out_ch, 7, 2, 3, bias=conv_bias)
+            # self.conv = PartialConv(in_ch, out_ch, 7, 2, 3, bias=conv_bias)
+            self.conv = PartialConv2d(in_ch, out_ch, 7, 2, 3, bias=conv_bias, return_mask=True, multi_channel=True)
         elif sample == 'down-3':
-            self.conv = PartialConv(in_ch, out_ch, 3, 2, 1, bias=conv_bias)
+            # self.conv = PartialConv(in_ch, out_ch, 3, 2, 1, bias=conv_bias)
+            self.conv = PartialConv2d(in_ch, out_ch, 3, 2, 1, bias=conv_bias, return_mask=True, multi_channel=True)
         else:
-            self.conv = PartialConv(in_ch, out_ch, 3, 1, 1, bias=conv_bias)
+            # self.conv = PartialConv(in_ch, out_ch, 3, 1, 1, bias=conv_bias)
+            self.conv = PartialConv2d(in_ch, out_ch, 3, 1, 1, bias=conv_bias, return_mask=True, multi_channel=True)
 
         if bn:
             self.bn = nn.BatchNorm2d(out_ch)
@@ -198,7 +203,8 @@ if __name__ == '__main__':
     input_mask = torch.ones(size)
     input_mask[:, :, 2:, :][:, :, :, 2:] = 0
 
-    conv = PartialConv(3, 3, 3, 1, 1)
+    # conv = PartialConv(3, 3, 3, 1, 1)
+    conv = PartialConv2d(3, 3, 3, 1, 1, return_mask=True, multi_channel=True)
     l1 = nn.L1Loss()
     input.requires_grad = True
 
